@@ -13,7 +13,11 @@
         </li>
       </ul>
     </main>
-    <modal v-if="showModal" @close="showModal = false">
+    <footer class="footer">
+
+    </footer>
+    <dialog class="modal_container" open v-if="showModal" @close="showModal = false">
+      <div class="modal">
       <h2 class="modal__title">{{ selectedTask ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
       <form class="modal__form">
         <label class="modal__label">Nome da Tarefa</label>
@@ -23,7 +27,8 @@
         <button class="modal__save-btn" @click="saveTask">{{ selectedTask ? 'Salvar' : 'Adicionar' }}</button>
         <button class="modal__cancel-btn" @click="showModal = false">Cancelar</button>
       </div>
-    </modal>
+      </div>
+    </dialog>
   </div>
 </template>
 
@@ -82,6 +87,16 @@ export default {
     padding: 0;
     margin: 0;
   }
+  body { 
+    min-height: 100vh; 
+    background: linear-gradient(#F8B195, #C06C84);
+    display:flex; flex-direction:column;
+  }
+  .container{
+    display: flex;
+    flex-direction: column;
+    background-size: cover;
+  }
   .header{
     display: flex;
     flex-flow: column wrap;
@@ -91,6 +106,13 @@ export default {
     padding: 1.5em 0.5em 1.5em 1.5em;
     background-color: #355C7D;
     width: 100%;
+    color: white;
+  }
+  .footer{
+    background-color: #355C7D;
+    width: 100%;
+    min-height: 10%;
+    padding: 2.5em;
     color: white;
   }
   .header__title{
@@ -114,9 +136,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: linear-gradient(#F8B195, #C06C84);
     background-size: cover;
-    color: white;   
+    color: white;  
+    min-height: 100vh; 
   }
   .task-list{
     list-style-type: none;
@@ -145,6 +167,20 @@ export default {
     border-radius: 1.5em;    
   }
 
+  .modal_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: rgb(0 0 0 / .3);
+    padding: 1em;
+    max-width: 50vh;
+    min-height: 100vh;
+  }
+
+  .modal{
+    border-radius: 5rem;;
+  }
+
   .modal__title{
     display: flex;
     flex-direction: column;
@@ -160,7 +196,7 @@ export default {
 
   .modal__form{
     font-family:Verdana, Geneva, Tahoma, sans-serif;
-    padding: 1em;
+    padding: 1.5em;
     background: linear-gradient(#F8B195, #C06C84);
     color: rgb(255, 255, 255);
   }
