@@ -25,7 +25,7 @@
       </form>
       <div class="modal__actions">
         <button class="modal__save-btn" @click="saveTask">{{ selectedTask ? 'Salvar' : 'Adicionar' }}</button>
-        <button class="modal__cancel-btn" @click="showModal = false">Cancelar</button>
+        <button class="modal__cancel-btn" @click="cancelTask">Cancelar</button>
       </div>
       </div>
     </dialog> 
@@ -45,7 +45,8 @@ export default {
       showModal: false,
       selectedTask: null,
       form: {
-        name: ''
+        name: '',
+        completed: false
       }, 
     };
   },
@@ -60,66 +61,46 @@ export default {
       const data = await req.json()
       this.title = data.title.name
     },
-     addTask() {
-      this.modalTitle = 'Add Task';
-      this.currentTask = {};
-      this.showModal = true;
-    },
-    editTask(id) {
-      this.modalTitle = 'Edit Task';
-      this.currentTask = this.tasks.find(task => task.id === id);
-      this.showModal = true;
-    },
-    deleteTask(id) {
-      this.tasks = this.tasks.filter(task => task.id !== id);
-    },
-    saveTask() {
+    async saveTask() {  
+      const response = await fetch("http://localhost:3000/tarefas");
+      const existingData = await response.json();
+
       if (this.selectedTask) {
-        this.selectedTask.name = this.form.name;
-        this.selectedTask = null;
+        const existingTask = existingData.tasks.find(task => task.id === this.selectedTask.id);
+        if (existingTask) {
+          existingTask.name = this.form.name;
+          existingTask.completed = this.form.completed = this.selectedTask.completed;
+        }
       } else {
-        this.tasks.push({
-          id: Math.max(...this.tasks.map(task => task.id)) + 1,
+        const newId = existingData.tasks.length + 1;
+        const newTask = {
+          id: newId,
           name: this.form.name,
-          completed: false
-        });
+          completed: this.form.completed
+        };
+        existingData.tasks.push(newTask);
       }
+
+      const dataJson = JSON.stringify(existingData);
+      const req = await fetch("http://localhost:3000/tarefas", {
+        method: "POST",
+        headers: { "Content-Type" : "application/json" },
+        body: dataJson
+      });
+
+      const res = await req.json();
+      console.log(res);
+
       this.form.name = '';
+      this.form.completed = false;
       this.showModal = false;
+      this.selectedTask = null;
+      this.getTasks();
     },
-    async createTask(e){
-      e.preventDefault()
-      if (this.selectedTask) {
-        this.selectedTask.name = this.form.name;
-        this.selectedTask = null;
-      } else {
-        const data = {
-        task: Array.from(this.task),
-          }
-          const dataJson = JSON.stringify(data)    
-
-          const req = await fetch("http://localhost:3000/tarefas", {
-            method: "POST",
-            headers: { "Content-Type" : "application/json" },
-            body: dataJson
-          });
-          const res = await req.json()
-          console.log(res)
-
-        this.tasks.push({
-          id: Math.max(...this.tasks.map(task => task.id)) + 1,
-          name: this.form.name,
-          completed: false
-        });
-      }
-      this.form.name = '';
+    cancelTask() {
       this.showModal = false;
-
-      //limpar array
-
-      this.task = []
-      
-    } 
+      this.selectedTask = null;
+    }
   },
   mounted () {
     this.getTasks(),
