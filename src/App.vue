@@ -1,14 +1,14 @@
 <template>
   <div class="container">
     <header class="header">
-      <h1 class="header__title">Konecta</h1>
+      <h1 class="header__title" >{{ title }}</h1>
     </header>
     <main class="main">
       <button class="add-task-btn" @click="showModal = true">Adicionar Tarefa</button>
       <ul class="task-list">
-        <li v-for="task in tasks" :key="task.id" class="task-list__item">
-          <span :class="{ 'task-list__task--completed': task.completed }">{{ task.name }}</span>
+        <li v-for="task in tasksdata" :key="task.id" value="task.name" class="task-list__item">
           <input type="checkbox" v-model="task.completed" />
+          <span class="task-list__task--completed">{{ task.name }}</span>
           <button class="task-list__edit-task-btn" @click="showModal = true; selectedTask = task">Editar</button>
         </li>
       </ul>
@@ -28,7 +28,7 @@
         <button class="modal__cancel-btn" @click="showModal = false">Cancelar</button>
       </div>
       </div>
-    </dialog>
+    </dialog> 
   </div>
 </template>
 
@@ -37,20 +37,30 @@
 export default {
   data() {
     return {
-      tasks: [
-        { id: 1, name: 'Fazer compras', completed: false },
-        { id: 2, name: 'Lavar roupa', completed: false },
-        { id: 3, name: 'Limpar a casa', completed: true }
-      ],
+      tasks: [],
+      tasksdata: null,
+      name: null,
+      completed: false,
+      title: null,
       showModal: false,
       selectedTask: null,
       form: {
         name: ''
-      },
+      }, 
     };
   },
   methods: {
-    addTask() {
+    async getTasks() {
+      const req = await fetch('http://localhost:3000/tarefas')
+      const data = await req.json()
+      this.tasksdata = data.tasks
+    },
+    async getTitle() {
+      const req = await fetch('http://localhost:3000/titulos')
+      const data = await req.json()
+      this.title = data.title.name
+    },
+     addTask() {
       this.modalTitle = 'Add Task';
       this.currentTask = {};
       this.showModal = true;
@@ -76,7 +86,44 @@ export default {
       }
       this.form.name = '';
       this.showModal = false;
-    }
+    },
+    async createTask(e){
+      e.preventDefault()
+      if (this.selectedTask) {
+        this.selectedTask.name = this.form.name;
+        this.selectedTask = null;
+      } else {
+        const data = {
+        task: Array.from(this.task),
+          }
+          const dataJson = JSON.stringify(data)    
+
+          const req = await fetch("http://localhost:3000/tarefas", {
+            method: "POST",
+            headers: { "Content-Type" : "application/json" },
+            body: dataJson
+          });
+          const res = await req.json()
+          console.log(res)
+
+        this.tasks.push({
+          id: Math.max(...this.tasks.map(task => task.id)) + 1,
+          name: this.form.name,
+          completed: false
+        });
+      }
+      this.form.name = '';
+      this.showModal = false;
+
+      //limpar array
+
+      this.task = []
+      
+    } 
+  },
+  mounted () {
+    this.getTasks(),
+    this.getTitle()
   },
 };
 </script>
@@ -155,6 +202,7 @@ export default {
     align-self: flex-start;
     padding: 1.2em;
     font-size: 1.2em;
+    color: white;
   }
 
   .task-list__edit-task-btn{
