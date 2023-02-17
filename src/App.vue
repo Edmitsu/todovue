@@ -2,6 +2,7 @@
   <div class="container">
     <header class="header">
       <h1 class="header__title" >{{ title }}</h1>
+      <input type="text" v-model="title" @input="changeTitle" />
     </header>
     <main class="main">
       <button class="add-task-btn" @click="showModal = true">Adicionar Tarefa</button>
@@ -48,7 +49,7 @@ export default {
       tasksdata: null,
       name: null,
       completed: false,
-      title: null,
+      title: '',
       showModal: false,
       selectedTask: null,
       form: {
@@ -70,7 +71,7 @@ export default {
     async getTitle() {
       const req = await fetch('http://localhost:3000/titulos')
       const data = await req.json()
-      this.title = data.title.name
+      this.title = data.title
     },
     async saveTask() {  
       const response = await fetch("http://localhost:3000/tarefas");
@@ -132,8 +133,26 @@ export default {
 
         this.getTasks();
       }
-    }
+    },
+    async changeTitle() {
+      const response = await fetch('http://localhost:3000/titulos');
+      const existingData = await response.json();
 
+      const newTitle = this.newTitle;
+
+      existingData.titulo = newTitle;
+
+      const data = { title: this.title };
+      const dataJson = JSON.stringify(data);
+      const req = await fetch("http://localhost:3000/titulos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: dataJson
+      });
+
+      const res = await req.json();
+      console.log(res);
+    }
   },
   mounted () {
     this.getTasks(),
