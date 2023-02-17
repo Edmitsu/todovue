@@ -301,6 +301,7 @@ export default {
   .task-list__task--completed {
     color: #333;
     font-size: 1.2em;
+    text-decoration: line-through;
   }
 
   .task-list__date{
