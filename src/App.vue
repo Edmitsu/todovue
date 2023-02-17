@@ -5,6 +5,7 @@
     </header>
     <main class="main">
       <button class="add-task-btn" @click="showModal = true">Adicionar Tarefa</button>
+      <TaskForm></TaskForm>
       <ul class="task-list">
         <li v-for="task in tasksdata" :key="task.id" value="task.name" class="task-list__item">
           <input type="checkbox" v-model="task.completed" />
@@ -34,7 +35,10 @@
 
 
 <script>
+  import  TaskForm  from "./components/TaskForm";
+  
 export default {
+  name:"App",
   data() {
     return {
       tasks: [],
@@ -50,6 +54,10 @@ export default {
       }, 
     };
   },
+  components:{
+    TaskForm
+  },
+  
   methods: {
     async getTasks() {
       const req = await fetch('http://localhost:3000/tarefas')
@@ -100,7 +108,7 @@ export default {
     cancelTask() {
       this.showModal = false;
       this.selectedTask = null;
-    }
+    },
   },
   mounted () {
     this.getTasks(),
