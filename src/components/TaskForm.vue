@@ -1,5 +1,5 @@
 <template>
-  <button class="add-task-btn" type="button" @click="showModal = true">Adicionar Tarefas iniciais</button>
+  <button class="add-task-btn" type="button" @click="showModal = true">Adicionar Tarefas</button>
   <dialog open class="modal_container" v-if="showModal" @close="showModal = false" >
     <div class="task-form-container">
       <form @submit.prevent="handleSubmit" class="modal__form">
@@ -32,10 +32,8 @@ export default {
       const response = await fetch('http://localhost:3000/tarefas');
       const existingData = await response.json();
 
-      // Generate new task IDs based on existing tasks
       const newIds = Array.from({ length: this.tasks.length }, (_, i) => existingData.tasks.length + 1 + i);
 
-      // Create new task objects with IDs
       const newTasks = this.tasks.map((task, i) => ({
         id: newIds[i],
         name: task.name,
@@ -43,14 +41,12 @@ export default {
         dueDate: task.dueDate
       }));
 
-      // Add new tasks to existing data
       if (existingData.tasks.length > 0) {
         existingData.tasks.push(...newTasks);
       } else {
         existingData.tasks = newTasks;
       }
 
-      // Update JSON file with new data
       const dataJson = JSON.stringify(existingData);
       const req = await fetch('http://localhost:3000/tarefas', {
         method: 'PUT',
@@ -61,14 +57,11 @@ export default {
       const res = await req.json();
       console.log(res);
 
-      // Reset form data and close modal
       this.tasks = [{ name: '', completed: false, dueDate: '' }];
       this.showModal = false;
 
-      // Emit event to update task list
       this.$emit('task-added');
 
-      // Reload the page to show updated content
       window.location.reload();
     },
 

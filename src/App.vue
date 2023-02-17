@@ -5,15 +5,14 @@
       <input type="text" v-model="title" @input="changeTitle" />
     </header>
     <main class="main">
-      <button class="add-task-btn" @click="showModal = true">Adicionar Tarefa</button>
       <TaskForm>
         
       </TaskForm>
       <ul class="task-list">
         <li v-for="task in tasks" :key="task.id" class="task-list__item">
           <input type="checkbox" v-model="task.completed" />
-          <span class="task-list__task--completed">{{ task.name }}</span>
-          <span v-if="task.dueDate"> -  {{ getTimeRemaining(task.dueDate) }}</span>
+          <span :class="{'task-list__task--completed': task.completed}">{{ task.name }}</span>
+          <span v-if="task.dueDate"> - {{ this.getTimeRemaining(task.dueDate) }} restante</span>
           <button class="task-list__edit-task-btn" @click="showModal = true; selectedTask = task">Editar</button>
           <button class="task-list__edit-task-btn" @click="deleteTask(task.id)">Deletar</button>
         </li>
@@ -28,6 +27,8 @@
       <form class="modal__form">
         <label class="modal__label">Nome da Tarefa</label>
         <input class="modal__input" v-model="form.name" />
+        <label class="modal__label">Data de Vencimento</label>
+        <input class="modal__input" type="date" v-model="form.dueDate" />
       </form>
       <div class="modal__actions">
         <button class="modal__save-btn" @click="saveTask">{{ selectedTask ? 'Salvar' : 'Adicionar' }}</button>
@@ -40,69 +41,77 @@
 
 
 <script>
-  import  TaskForm  from "./components/TaskForm";
-  
+import TaskForm from "./components/TaskForm";
+
 export default {
-  name:"App",
+  name: "App",
   data() {
     return {
       tasks: [],
-      tasksdata: null,
-      name: null,
-      completed: false,
-      title: '',
+      title: "",
       showModal: false,
       selectedTask: null,
-      dueDate: null,
       form: {
-        name: '',
-        completed: false
-      }, 
+        name: "",
+        dueDate: null,
+      },
     };
   },
-  components:{
-    TaskForm
+  components: {
+    TaskForm,
   },
-  
+  created() {
+    this.getTasks();
+    this.getTitle();
+  },
+  mounted(){
+    this.getTimeRemaining();
+  },
   methods: {
     async getTasks() {
       const response = await fetch("http://localhost:3000/tarefas");
       const data = await response.json();
 
-      data.tasks.forEach(task => {
+      const today = new Date();
+
+      data.tasks.forEach((task) => {
         const dueDate = new Date(task.dueDate);
-        const today = new Date();
         const diffInTime = dueDate.getTime() - today.getTime();
-        const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
-        task.daysLeft = diffInDays > 0 ? diffInDays : 0;
+        const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+        const diffInHours = Math.floor((diffInTime % (1000 * 3600 * 24)) / (1000 * 3600));
+        const diffInMinutes = Math.floor((diffInTime % (1000 * 3600)) / (1000 * 60));
+        const diffInSeconds = Math.floor((diffInTime % (1000 * 60)) / 1000);
+
+        task.timeRemaining = `${diffInDays} days, ${diffInHours} hours, ${diffInMinutes} minutes, ${diffInSeconds} seconds`;
       });
 
       this.tasks = data.tasks;
-      console.log(this.tasks)
     },
+
     async getTitle() {
-      const req = await fetch('http://localhost:3000/titulos')
-      const data = await req.json()
-      this.title = data.title
+      const req = await fetch("http://localhost:3000/titulos");
+      const data = await req.json();
+      this.title = data.title;
     },
     async saveTask() {
-    const response = await fetch("http://localhost:3000/tarefas");
-    const existingData = await response.json();
+      const response = await fetch("http://localhost:3000/tarefas");
+      const existingData = await response.json();
 
-    if (this.selectedTask) {
-      const existingTask = existingData.tasks.find(task => task.id === this.selectedTask.id);
-      if (existingTask) {
-        existingTask.name = this.form.name;
-        existingTask.completed = this.form.completed = this.selectedTask.completed;
-        existingTask.remainingTime = this.getRemainingTime(existingTask);
-      }
+      if (this.selectedTask) {
+        const existingTask = existingData.tasks.find(
+          (task) => task.id === this.selectedTask.id
+        );
+        if (existingTask) {
+          existingTask.name = this.form.name;
+          existingTask.dueDate = this.form.dueDate || existingTask.dueDate;
+        }
       } else {
         const newId = existingData.tasks.length + 1;
         const newTask = {
           id: newId,
           name: this.form.name,
-          completed: this.form.completed,
-          remainingTime: this.getRemainingTime()
+          completed: false,
+          dueDate: this.form.dueDate,
         };
         existingData.tasks.push(newTask);
       }
@@ -110,16 +119,15 @@ export default {
       const dataJson = JSON.stringify(existingData);
       const req = await fetch("http://localhost:3000/tarefas", {
         method: "POST",
-        headers: { "Content-Type" : "application/json" },
-        body: dataJson
+        headers: { "Content-Type": "application/json" },
+        body: dataJson,
       });
 
       const res = await req.json();
       console.log(res);
 
-      this.form.name = '';
-      this.form.completed = false;
-      this.form.remainingTime = '';
+      this.form.name = "";
+      this.form.dueDate = null;
       this.showModal = false;
       this.selectedTask = null;
       this.getTasks();
@@ -127,20 +135,22 @@ export default {
     cancelTask() {
       this.showModal = false;
       this.selectedTask = null;
+      this.form.name = "";
+      this.form.dueDate = null;
     },
     async deleteTask(id) {
       const response = await fetch("http://localhost:3000/tarefas");
       const existingData = await response.json();
 
-      const index = existingData.tasks.findIndex(task => task.id === id);
+      const index = existingData.tasks.findIndex((task) => task.id === id);
       if (index !== -1) {
         existingData.tasks.splice(index, 1);
 
         const dataJson = JSON.stringify(existingData);
         const req = await fetch("http://localhost:3000/tarefas", {
           method: "PUT",
-          headers: { "Content-Type" : "application/json" },
-          body: dataJson
+          headers: { "Content-Type": "application/json" },
+          body: dataJson,
         });
 
         const res = await req.json();
@@ -149,49 +159,28 @@ export default {
         this.getTasks();
       }
     },
-    async changeTitle() {
-      const response = await fetch('http://localhost:3000/titulos');
-      const existingData = await response.json();
-
-      const newTitle = this.newTitle;
-
-      existingData.titulo = newTitle;
-
-      const data = { title: this.title };
-      const dataJson = JSON.stringify(data);
-      const req = await fetch("http://localhost:3000/titulos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: dataJson
-      });
-
-      const res = await req.json();
-      console.log(res);
-    },
-    getTimeRemaining(dueDate) {
-      const timeRemaining = new Date(dueDate) - new Date();
-      const seconds = Math.floor((timeRemaining / 1000) % 60);
-      const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
-      const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
-      const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    },
-    updateTimeRemaining() {
-      // atualiza o tempo restante para cada tarefa
-      this.tasks.forEach((task) => {
-        if (task.dueDate) {
-          task.timeRemaining = this.getTimeRemaining(task.dueDate);
-        }
-      });
-    },
-  },  
-   
-  mounted () {
-    this.getTasks(),
-    this.getTitle()
-  },
-};
+      openModal(task = null) {
+        this.showModal = true;
+        this.form.name = task ? task.name : "";
+        this.form.dueDate = task ? task.dueDate: null;
+        this.selectedTask = task;
+        },
+        getTimeRemaining(dueDate) {
+         const dueDateTime = new Date(dueDate).getTime();
+         const now = new Date().getTime();
+         const timeRemaining = dueDateTime - now;
+ 
+         const seconds = Math.floor((timeRemaining / 1000) % 60);
+         const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
+         const hours = Math.floor((timeRemaining / 1000 / 60 / 60) % 24);
+         const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+ 
+         return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+       }
+      },
+    };
 </script>
+
 
 <style>
   *{
@@ -272,6 +261,7 @@ export default {
 
   .task-list__task--completed {
     color: #333;
+    font-size: 1.2em;
   }
 
   .task-list__edit-task-btn{
