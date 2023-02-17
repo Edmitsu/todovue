@@ -1,14 +1,19 @@
 <template>
-  <form @submit.prevent="handleSubmit">
-    <div v-for="(task, index) in tasks" :key="index">
-      <label :for="'name' + index">Nome da tarefa:</label>
-      <input type="text" :id="'name' + index" v-model="task.name" />
-      <label :for="'completed' + index">Completado:</label>
+  <button class="add-task-btn" type="button" @click="showModal = true">Adicionar Tarefas iniciais</button>
+  <dialog open class="modal_container" v-if="showModal" @close="showModal = false" >
+  <div class="task-form-container">
+  <form @submit.prevent="handleSubmit" class="modal__form">
+    <div class="task-form-row" v-for="(task, index) in tasks" :key="index" >
+      <label class="modal__label modal__label_name" :for="'name' + index">Nome da tarefa:</label>
+      <input class="modal__input" type="text" :id="'name' + index" v-model="task.name" />
+      <label class="modal__label" :for="'completed' + index">Completado:</label>
       <input type="checkbox" :id="'completed' + index" v-model="task.completed" />
     </div>
-    <button type="button" @click="addTask">Adicionar Tarefa</button>
-    <button type="submit">{{ tasks.length > 1 ? 'Adicionar Tarefas' : ' Salvar Tarefas' }}</button>
+    <button type="button" class="task-form-button" @click="addTask">Adicionar Tarefa</button>
+    <button type="submit" class="task-form-button">{{ tasks.length > 1 ? 'Adicionar Tarefas' : 'Salvar Tarefas' }}</button>
   </form>
+  </div>
+</dialog>
 </template>
 
 <script>
@@ -17,6 +22,7 @@ export default {
   data() {
     return {
       tasks: [{ name: '', completed: false }],
+      showModal: false,
     };
   },
   methods: {
@@ -65,3 +71,58 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.task-form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem;
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.task-form-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1em;
+  flex-wrap: wrap;
+}
+
+label {
+  font-size: 1em;
+  font-weight: bold;
+  padding: 1em;
+}
+
+input{
+  padding: 1em;
+  border-radius: 1.5em;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.task-form-button {
+  padding: 1em;
+  border-radius: 1.5em;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.modal_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: rgb(0 0 0 / .3);
+    padding: 1em;
+    max-width: 50vh;
+    min-height: 100vh;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    
+}
+.modal__label_name{
+  font-size: 1.3em;
+}
+</style>

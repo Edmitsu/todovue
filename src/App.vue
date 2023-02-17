@@ -5,12 +5,15 @@
     </header>
     <main class="main">
       <button class="add-task-btn" @click="showModal = true">Adicionar Tarefa</button>
-      <TaskForm></TaskForm>
+      <TaskForm>
+        
+      </TaskForm>
       <ul class="task-list">
         <li v-for="task in tasksdata" :key="task.id" value="task.name" class="task-list__item">
           <input type="checkbox" v-model="task.completed" />
           <span class="task-list__task--completed">{{ task.name }}</span>
           <button class="task-list__edit-task-btn" @click="showModal = true; selectedTask = task">Editar</button>
+          <button class="task-list__edit-task-btn" @click="deleteTask(task.id)">Deletar</button>
         </li>
       </ul>
     </main>
@@ -109,6 +112,28 @@ export default {
       this.showModal = false;
       this.selectedTask = null;
     },
+    async deleteTask(id) {
+      const response = await fetch("http://localhost:3000/tarefas");
+      const existingData = await response.json();
+
+      const index = existingData.tasks.findIndex(task => task.id === id);
+      if (index !== -1) {
+        existingData.tasks.splice(index, 1);
+
+        const dataJson = JSON.stringify(existingData);
+        const req = await fetch("http://localhost:3000/tarefas", {
+          method: "PUT",
+          headers: { "Content-Type" : "application/json" },
+          body: dataJson
+        });
+
+        const res = await req.json();
+        console.log(res);
+
+        this.getTasks();
+      }
+    }
+
   },
   mounted () {
     this.getTasks(),
@@ -146,7 +171,7 @@ export default {
   }
   .footer{
     background-color: #355C7D;
-    width: 100%;
+    width: 100vh;
     min-height: 10%;
     padding: 2.5em;
     color: white;
