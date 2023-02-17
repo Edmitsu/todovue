@@ -10,9 +10,13 @@
       </TaskForm>
       <ul class="task-list">
         <li v-for="task in tasks" :key="task.id" class="task-list__item">
-          <input type="checkbox" v-model="task.completed" />
+          <label class="container__checkbox">
+            <input class="task-list__checkbox" type="checkbox" v-model="task.completed" />
+            <span class="checkmark"></span>
+          </label>
+
           <span :class="{'task-list__task--completed': task.completed}">{{ task.name }}</span>
-          <span v-if="task.dueDate"> - {{ this.getTimeRemaining(task.dueDate) }} restante</span>
+          <span class="task-list__date" v-if="task.dueDate"> - {{ this.getTimeRemaining(task.dueDate) }} restante</span>
           <button class="task-list__edit-task-btn" @click="showModal = true; selectedTask = task">Editar</button>
           <button class="task-list__edit-task-btn" @click="deleteTask(task.id)">Deletar</button>
         </li>
@@ -211,7 +215,7 @@ export default {
   }
   .footer{
     background-color: #355C7D;
-    width: 100vh;
+    width: 100%;
     min-height: 10%;
     padding: 2.5em;
     color: white;
@@ -250,6 +254,42 @@ export default {
     padding: 1.4em;
   }
 
+  .container__checkbox {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  }
+
+  .task-list__checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark {
+    display: flex;   
+    top: 0;
+    left: 0;
+    height: 1em;
+    width: 1em;
+    background-color: #eee;
+    border-radius: 2px;
+    margin: 0em 0.5em 0em 0em;
+  }
+
+  .container__checkbox:hover input ~ .checkmark {
+    background-color: #ccc;
+  }
+
+  .container input:checked ~ .checkmark {
+    background-color: #C06C84;
+  }
+
   .task-list__item{
     display: flex;
     align-items: center;
@@ -262,6 +302,17 @@ export default {
   .task-list__task--completed {
     color: #333;
     font-size: 1.2em;
+  }
+
+  .task-list__date{
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px;
+    font-size: 0.7em;
+    background: transparent; 
+    color: rgb(255, 255, 255);
+    border: none;
+    border-radius: 1.5em;  
   }
 
   .task-list__edit-task-btn{

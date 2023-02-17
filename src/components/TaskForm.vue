@@ -5,9 +5,12 @@
       <form @submit.prevent="handleSubmit" class="modal__form">
         <div class="task-form-row" v-for="(task, index) in tasks" :key="index" >
           <label class="modal__label modal__label_name" :for="'name' + index">Nome da tarefa:</label>
-          <input class="modal__input" type="text" :id="'name' + index" v-model="task.name" />
-          <label class="modal__label" :for="'completed' + index">Completado:</label>
-          <input type="checkbox" :id="'completed' + index" v-model="task.completed" />
+          <input class="modal__input" placeholder="insira o nome da tarefa" type="text" :id="'name' + index" v-model="task.name" />
+          <label class="container__checkbox">
+            <label :for="'completed' + index">Completado:</label>
+            <input class="checkbox" type="checkbox" :id="'completed' + index" v-model="task.completed" />
+            <span class="checkmark"></span>
+          </label>
           <label class="modal__label" :for="'dueDate' + index">Data de vencimento:</label>
           <input type="date" :id="'dueDate' + index" v-model="task.dueDate" />
         </div>
@@ -79,10 +82,16 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 2rem;
   font-family:Verdana, Geneva, Tahoma, sans-serif;
 }
 
+.modal__form{
+  border-radius: 1.5em;
+}
+
+.modal__input::placeholder{
+  color: white;
+}
 .task-form-row {
   display: flex;
   flex-direction: column;
@@ -91,6 +100,29 @@ export default {
   padding: 1em;
   flex-wrap: wrap;
 }
+
+.container__checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.2em;
+  }
+
+  .checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .container__checkbox:hover input ~ .checkmark {
+    background-color: #ccc;
+  }
+
+  .container input:checked ~ .checkmark {
+    background-color: #C06C84;
+  }
 
 label {
   font-size: 1em;
@@ -115,13 +147,12 @@ input{
 .modal_container{
     display: flex;
     flex-direction: column;
-    justify-content: center;
     background-color: rgb(0 0 0 / .3);
     padding: 1em;
-    max-width: 50vh;
     min-height: 100vh;
+    min-width: 100vw;
     font-family:Verdana, Geneva, Tahoma, sans-serif;
-    
+    z-index: 1;    
 }
 .modal__label_name{
   font-size: 1.3em;
