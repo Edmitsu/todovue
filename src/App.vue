@@ -30,7 +30,7 @@
       <h2 class="modal__title">{{ selectedTask ? 'Editar Tarefa' : 'Nova Tarefa' }}</h2>
       <form class="modal__form">
         <label class="modal__label">Nome da Tarefa</label>
-        <input class="modal__input" v-model="form.name" />
+        <input placeholder="Insira o nome da tarefa" class="modal__input" v-model="form.name" />
         <label class="modal__label">Data de Vencimento</label>
         <input class="modal__input" type="date" v-model="form.dueDate" />
       </form>
@@ -194,7 +194,7 @@ export default {
   }
   body { 
     min-height: 100vh; 
-    background: linear-gradient(#F8B195, #C06C84);
+    background: linear-gradient(#355C7D, white);
     display:flex; flex-direction:column;
   }
   .container{
@@ -230,8 +230,7 @@ export default {
     margin: 0.5em 0 0 0;
     padding: 0.5em;
     cursor: pointer;  
-    background-color: #C06C84;
-    box-shadow: 0px 0px 2px 2px #F67280;
+    background-color: #355C7D;
     width: 80%;
     color: white;
     border-radius: 1.5em;
@@ -287,7 +286,7 @@ export default {
   }
 
   .container input:checked ~ .checkmark {
-    background-color: #C06C84;
+    background-color: #68a3d6;
   }
 
   .task-list__item{
@@ -331,12 +330,8 @@ export default {
     justify-content: center;
     background-color: rgb(0 0 0 / .3);
     padding: 1em;
-    max-width: 50vh;
+    min-width: 100vw;
     min-height: 100vh;
-  }
-
-  .modal{
-    border-radius: 5rem;;
   }
 
   .modal__title{
@@ -353,9 +348,11 @@ export default {
   }
 
   .modal__form{
+    display: flex;
+    flex-direction: column;
     font-family:Verdana, Geneva, Tahoma, sans-serif;
     padding: 1.5em;
-    background: linear-gradient(#F8B195, #C06C84);
+    background-color:#355C7D;
     color: rgb(255, 255, 255);
   }
   .modal__label{
@@ -365,8 +362,8 @@ export default {
     padding: 0.5em;
     margin: 1em;
     border-radius: 1em;
-    background-color: #C06C84;
-    color: rgb(255, 255, 255);
+    background-color: white;
+    color: #355C7D;
     border: none;
     
   }
@@ -374,18 +371,18 @@ export default {
     display: flex;
     padding: 1em;
     justify-content: flex-end;
-    background: linear-gradient(#C06C84, #6C5B7B);   
+    background-color:white;   
     color: white;  
   }
   .modal__save-btn{
-    background-color: #C06C84;
+    background-color: #355C7D;
     border-radius: 1em;
     color: rgb(255, 255, 255); 
     padding:0.5em;
     margin: 0.5em;
   }
   .modal__cancel-btn{
-    background-color: #C06C84;
+    background-color: #355C7D;
     border-radius: 1em;
     color: rgb(255, 255, 255); 
     padding:0.5em;

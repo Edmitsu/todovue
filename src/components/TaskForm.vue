@@ -90,7 +90,7 @@ export default {
 }
 
 .modal__input::placeholder{
-  color: white;
+  color: #355C7D ;
 }
 .task-form-row {
   display: flex;
@@ -121,7 +121,7 @@ export default {
   }
 
   .container input:checked ~ .checkmark {
-    background-color: #C06C84;
+    background-color: #68a3d6 ;
   }
 
 label {
