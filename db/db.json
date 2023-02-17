@@ -1,0 +1,33 @@
+{
+  "titulos": {
+    "title": "Konecta"
+  },
+  "tarefas": {
+    "tasks": [
+      {
+        "id": 1,
+        "name": "Fazer compras",
+        "completed": false,
+        "dueDate": "2023-02-20"
+      },
+      {
+        "id": 2,
+        "name": "Lavar Roupa",
+        "completed": true,
+        "dueDate": "2023-02-23"
+      },
+      {
+        "id": 3,
+        "name": "Limpar a Casa",
+        "completed": false,
+        "dueDate": "2023-02-20"
+      },
+      {
+        "id": 4,
+        "name": "teste",
+        "completed": true,
+        "dueDate": "2023-02-20"
+      }
+    ]
+  }
+}
