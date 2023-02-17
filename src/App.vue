@@ -10,9 +10,10 @@
         
       </TaskForm>
       <ul class="task-list">
-        <li v-for="task in tasksdata" :key="task.id" value="task.name" class="task-list__item">
+        <li v-for="task in tasks" :key="task.id" class="task-list__item">
           <input type="checkbox" v-model="task.completed" />
           <span class="task-list__task--completed">{{ task.name }}</span>
+          <span v-if="task.dueDate"> -  {{ getTimeRemaining(task.dueDate) }}</span>
           <button class="task-list__edit-task-btn" @click="showModal = true; selectedTask = task">Editar</button>
           <button class="task-list__edit-task-btn" @click="deleteTask(task.id)">Deletar</button>
         </li>
@@ -52,6 +53,7 @@ export default {
       title: '',
       showModal: false,
       selectedTask: null,
+      dueDate: null,
       form: {
         name: '',
         completed: false
@@ -64,31 +66,43 @@ export default {
   
   methods: {
     async getTasks() {
-      const req = await fetch('http://localhost:3000/tarefas')
-      const data = await req.json()
-      this.tasksdata = data.tasks
+      const response = await fetch("http://localhost:3000/tarefas");
+      const data = await response.json();
+
+      data.tasks.forEach(task => {
+        const dueDate = new Date(task.dueDate);
+        const today = new Date();
+        const diffInTime = dueDate.getTime() - today.getTime();
+        const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
+        task.daysLeft = diffInDays > 0 ? diffInDays : 0;
+      });
+
+      this.tasks = data.tasks;
+      console.log(this.tasks)
     },
     async getTitle() {
       const req = await fetch('http://localhost:3000/titulos')
       const data = await req.json()
       this.title = data.title
     },
-    async saveTask() {  
-      const response = await fetch("http://localhost:3000/tarefas");
-      const existingData = await response.json();
+    async saveTask() {
+    const response = await fetch("http://localhost:3000/tarefas");
+    const existingData = await response.json();
 
-      if (this.selectedTask) {
-        const existingTask = existingData.tasks.find(task => task.id === this.selectedTask.id);
-        if (existingTask) {
-          existingTask.name = this.form.name;
-          existingTask.completed = this.form.completed = this.selectedTask.completed;
-        }
+    if (this.selectedTask) {
+      const existingTask = existingData.tasks.find(task => task.id === this.selectedTask.id);
+      if (existingTask) {
+        existingTask.name = this.form.name;
+        existingTask.completed = this.form.completed = this.selectedTask.completed;
+        existingTask.remainingTime = this.getRemainingTime(existingTask);
+      }
       } else {
         const newId = existingData.tasks.length + 1;
         const newTask = {
           id: newId,
           name: this.form.name,
-          completed: this.form.completed
+          completed: this.form.completed,
+          remainingTime: this.getRemainingTime()
         };
         existingData.tasks.push(newTask);
       }
@@ -105,6 +119,7 @@ export default {
 
       this.form.name = '';
       this.form.completed = false;
+      this.form.remainingTime = '';
       this.showModal = false;
       this.selectedTask = null;
       this.getTasks();
@@ -152,8 +167,25 @@ export default {
 
       const res = await req.json();
       console.log(res);
-    }
-  },
+    },
+    getTimeRemaining(dueDate) {
+      const timeRemaining = new Date(dueDate) - new Date();
+      const seconds = Math.floor((timeRemaining / 1000) % 60);
+      const minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
+      const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+      const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    },
+    updateTimeRemaining() {
+      // atualiza o tempo restante para cada tarefa
+      this.tasks.forEach((task) => {
+        if (task.dueDate) {
+          task.timeRemaining = this.getTimeRemaining(task.dueDate);
+        }
+      });
+    },
+  },  
+   
   mounted () {
     this.getTasks(),
     this.getTitle()
@@ -234,8 +266,12 @@ export default {
     align-items: center;
     align-self: flex-start;
     padding: 1.2em;
-    font-size: 1.2em;
+    font-size: 1.4em;
     color: white;
+  }
+
+  .task-list__task--completed {
+    color: #333;
   }
 
   .task-list__edit-task-btn{

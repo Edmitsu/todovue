@@ -1,19 +1,21 @@
 <template>
   <button class="add-task-btn" type="button" @click="showModal = true">Adicionar Tarefas iniciais</button>
   <dialog open class="modal_container" v-if="showModal" @close="showModal = false" >
-  <div class="task-form-container">
-  <form @submit.prevent="handleSubmit" class="modal__form">
-    <div class="task-form-row" v-for="(task, index) in tasks" :key="index" >
-      <label class="modal__label modal__label_name" :for="'name' + index">Nome da tarefa:</label>
-      <input class="modal__input" type="text" :id="'name' + index" v-model="task.name" />
-      <label class="modal__label" :for="'completed' + index">Completado:</label>
-      <input type="checkbox" :id="'completed' + index" v-model="task.completed" />
+    <div class="task-form-container">
+      <form @submit.prevent="handleSubmit" class="modal__form">
+        <div class="task-form-row" v-for="(task, index) in tasks" :key="index" >
+          <label class="modal__label modal__label_name" :for="'name' + index">Nome da tarefa:</label>
+          <input class="modal__input" type="text" :id="'name' + index" v-model="task.name" />
+          <label class="modal__label" :for="'completed' + index">Completado:</label>
+          <input type="checkbox" :id="'completed' + index" v-model="task.completed" />
+          <label class="modal__label" :for="'dueDate' + index">Data de vencimento:</label>
+          <input type="date" :id="'dueDate' + index" v-model="task.dueDate" />
+        </div>
+        <button type="button" class="task-form-button" @click="addTask">Adicionar Tarefa</button>
+        <button type="submit" class="task-form-button">{{ tasks.length > 1 ? 'Adicionar Tarefas' : 'Salvar Tarefas' }}</button>
+      </form>
     </div>
-    <button type="button" class="task-form-button" @click="addTask">Adicionar Tarefa</button>
-    <button type="submit" class="task-form-button">{{ tasks.length > 1 ? 'Adicionar Tarefas' : 'Salvar Tarefas' }}</button>
-  </form>
-  </div>
-</dialog>
+  </dialog>
 </template>
 
 <script>
@@ -21,7 +23,7 @@ export default {
   name: 'TaskForm',
   data() {
     return {
-      tasks: [{ name: '', completed: false }],
+      tasks: [{ name: '', completed: false, dueDate: '' }],
       showModal: false,
     };
   },
@@ -34,7 +36,12 @@ export default {
       const newIds = Array.from({ length: this.tasks.length }, (_, i) => existingData.tasks.length + 1 + i);
 
       // Create new task objects with IDs
-      const newTasks = this.tasks.map((task, i) => ({ id: newIds[i], name: task.name, completed: task.completed }));
+      const newTasks = this.tasks.map((task, i) => ({
+        id: newIds[i],
+        name: task.name,
+        completed: task.completed,
+        dueDate: task.dueDate
+      }));
 
       // Add new tasks to existing data
       if (existingData.tasks.length > 0) {
@@ -55,7 +62,7 @@ export default {
       console.log(res);
 
       // Reset form data and close modal
-      this.tasks = [{ name: '', completed: false }];
+      this.tasks = [{ name: '', completed: false, dueDate: '' }];
       this.showModal = false;
 
       // Emit event to update task list
@@ -66,11 +73,12 @@ export default {
     },
 
     addTask() {
-      this.tasks.push({ name: '', completed: false });
+      this.tasks.push({ name: '', completed: false, dueDate: '' });
     },
   },
 };
 </script>
+
 
 <style scoped>
 .task-form-container {
